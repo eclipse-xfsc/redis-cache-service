@@ -1,0 +1,114 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ template "app.name" . }}"
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "app.labels" . | nindent 4 }}
+    app.kubernetes.io/instance: {{ include "app.revision" . }}
+    app.kubernetes.io/part-of: rse
+spec:
+  replicas: {{ .Values.replicaCount }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      {{- include "app.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "app.labels" . | nindent 8 }}
+      annotations:
+        {{- include "app.metricsAnnotations" . | nindent 8 }}
+{{- if .Values.podAnnotations }}
+{{ toYaml .Values.podAnnotations | indent 8 }}
+{{- end }}
+    spec:
+      securityContext:
+{{- include "app.securitycontext" . | nindent 8 }}
+     {{- if .Values.image.pullSecrets }}
+      imagePullSecrets:
+        - name: {{ .Values.image.pullSecrets }}
+      {{- end }}
+      containers:
+      - name: {{ template "app.name" . }}
+        image: "{{ .Values.image.repository }}/{{ .Values.image.name }}:{{ default .Chart.AppVersion .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+
+      {{- if .Values.useSecretRef }}
+        envFrom:
+          - secretRef:
+            name: {{ .Values.secretRefName }}
+      {{- else if .Values.useConfigMap }}
+        envFrom:
+          - configMapRef:
+              name: {{ .Values.configMapName }}
+      {{- else }}
+        env:
+          - name: LOG_LEVEL
+            value: {{ .Values.log.level | default "INFO" }}
+          - name: LOG_ENCODING
+            value: {{ .Values.log.encoding | default "json" }}
+          - name: HTTP_HOST
+            value: {{ .Values.cache.http.host | quote }}
+          - name: HTTP_PORT
+            value: {{ .Values.cache.http.port | quote }}
+          - name: HTTP_IDLE_TIMEOUT
+            value: {{ .Values.cache.http.timeout.idle | quote }}
+          - name: HTTP_READ_TIMEOUT
+            value: {{ .Values.cache.http.timeout.read | quote }}
+          - name: HTTP_WRITE_TIMEOUT
+            value: {{ .Values.cache.http.timeout.write | quote }}
+          {{- if .Values.redis.addr }}
+          - name: REDIS_ADDR
+            value: {{ .Values.redis.addr | quote }}
+          {{- end }}
+          - name: REDIS_USER
+            value: {{ .Values.redis.user | quote }}
+          - name: REDIS_PASS
+            value: {{ .Values.redis.pass | quote }}
+          {{- if .Values.redis.db }}
+          - name: REDIS_DB
+            value: {{ .Values.redis.db | quote }}
+          {{- end }}
+          - name: REDIS_EXPIRATION
+            value: {{ .Values.redis.expiration | quote }}
+          - name: NATS_ADDR
+            value: {{ .Values.cache.nats.url | quote }}
+          - name: NATS_SUBJECT
+            value: {{ .Values.cache.nats.subject | quote }}
+        {{- end }}
+
+          {{- if .Values.secretEnv }}
+          {{- range $key, $value := .Values.secretEnv }}
+          - name: "{{ $key }}"
+            valueFrom:
+              secretKeyRef:
+                name: "{{ $value.name }}"
+                key: "{{ $value.key }}"
+          {{- end }}
+          {{- end }}
+{{- if .Values.extraVars }}
+{{ toYaml .Values.extraVars | indent 8 }}
+{{- end }}
+        ports:
+        {{- if .Values.metrics.enabled }}
+        - name: monitoring
+          containerPort: {{ .Values.metrics.port }}
+        {{- end }}
+        - name: http
+          containerPort: {{ .Values.cache.http.port }}
+        readinessProbe:
+          httpGet:
+            path: /readiness
+            port: {{ .Values.cache.http.port }}
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          successThreshold: 2
+          failureThreshold: 2
+          timeoutSeconds: 5
+        resources:
+{{ toYaml .Values.resources | indent 10 }}

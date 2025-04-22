@@ -1,0 +1,11 @@
+image:
+  repository: registry.gitlab.com/gaia-x/data-infrastructure-federation-services/tsa
+  # -- Image name
+  name: cache
+
+redis:
+  addr: "redis-master.tsa:6379"
+
+ingress:
+  frontendDomain: tsa.gxfs.dev 
+  frontendTlsSecretName: wildcard-gxfs-dev 

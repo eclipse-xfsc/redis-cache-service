@@ -1,0 +1,24 @@
+variables:
+  HELPERS_FILE: helm-package.yml
+
+image: nexus.tech.vereign.com:6001/helm:3.5.3
+
+include:
+  - project: '${HELPERS_PATH}'
+    file: '${HELPERS_FILE}'
+
+stages:
+  - lint
+  - package
+
+helm-lint:
+  extends: .helm-lint
+  stage: lint
+  tags:
+    - amd64-docker
+
+helm-package:
+  extends: .helm-package
+  stage: package
+  tags:
+    - amd64-docker
