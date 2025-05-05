@@ -35,8 +35,6 @@ github.com/dgryski/go-rendezvous
 # github.com/dimfeld/httppath v0.0.0-20170720192232-ee938bf73598
 ## explicit
 github.com/dimfeld/httppath
-# github.com/dimfeld/httptreemux/v5 v5.5.0
-## explicit; go 1.9
 # github.com/eclipse-xfsc/microservice-core-go v1.1.0
 ## explicit; go 1.24.0
 github.com/eclipse-xfsc/microservice-core-go/pkg/auth
@@ -75,16 +73,12 @@ github.com/golang/protobuf/ptypes/timestamp
 # github.com/google/uuid v1.6.0
 ## explicit
 github.com/google/uuid
-# github.com/gopherjs/gopherjs v1.17.2
-## explicit; go 1.17
 # github.com/gorilla/websocket v1.5.3
 ## explicit; go 1.12
 github.com/gorilla/websocket
 # github.com/json-iterator/go v1.1.12
 ## explicit; go 1.12
 github.com/json-iterator/go
-# github.com/jtolds/gls v4.20.0+incompatible
-## explicit
 # github.com/kelseyhightower/envconfig v1.4.0
 ## explicit
 github.com/kelseyhightower/envconfig
@@ -199,17 +193,11 @@ github.com/segmentio/asm/cpu/arm64
 github.com/segmentio/asm/cpu/cpuid
 github.com/segmentio/asm/cpu/x86
 github.com/segmentio/asm/internal/unsafebytes
-# github.com/sergi/go-diff v1.3.1
-## explicit; go 1.12
-# github.com/smartystreets/assertions v1.13.0
-## explicit; go 1.17
 # github.com/stretchr/testify v1.10.0
 ## explicit; go 1.17
 github.com/stretchr/testify/assert
 github.com/stretchr/testify/assert/yaml
 github.com/stretchr/testify/require
-# github.com/zach-klippenstein/goregen v0.0.0-20160303162051-795b5e3961ea
-## explicit
 # go.uber.org/multierr v1.11.0
 ## explicit; go 1.19
 go.uber.org/multierr
@@ -225,7 +213,7 @@ go.uber.org/zap/internal/pool
 go.uber.org/zap/internal/stacktrace
 go.uber.org/zap/zapcore
 go.uber.org/zap/zaptest/observer
-# goa.design/goa/v3 v3.20.1
+# goa.design/goa/v3 v3.21.0
 ## explicit; go 1.23.0
 goa.design/goa/v3/dsl
 goa.design/goa/v3/eval
