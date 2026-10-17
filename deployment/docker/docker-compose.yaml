@@ -1,0 +1,46 @@
+services:
+  # cache:
+  #   build:
+  #     context: .
+  #     dockerfile: deployment/docker/Dockerfile
+  #   ports:
+  #     - "8080:8080"
+  #     - "2112:2112"
+  #   environment:
+  #     HTTP_HOST: "0.0.0.0"
+  #     HTTP_PORT: "8080"
+  #     METRICS_ADDR: ":2112"
+  #     LOG_LEVEL: "debug"
+  #     REDIS_ADDR: "redis:6379"
+  #     REDIS_USER: "default"
+  #     REDIS_PASS: "localtest"
+  #     REDIS_DB: "0"
+  #     REDIS_EXPIRATION: "1h"
+  #     REDIS_CLUSTER: "false"
+  #     NATS_ADDR: "nats:4222"
+  #     NATS_SUBJECT: "external_cache_events"
+  #   depends_on:
+  #     redis:
+  #       condition: service_healthy
+  #     nats:
+  #       condition: service_healthy
+  #   restart: on-failure
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--requirepass", "localtest"]
+    ports:
+      - "127.0.0.1:6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "localtest", "ping"]
+      interval: 3s
+      timeout: 3s
+      retries: 15
+  nats:
+    image: nats:2.10-alpine
+    ports:
+      - "127.0.0.1:4222:4222"
+    healthcheck:
+      test: ["CMD", "nats-server", "--help"]
+      interval: 5s
+      timeout: 3s
+      retries: 5

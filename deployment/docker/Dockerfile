@@ -1,19 +1,39 @@
-FROM golang:1.24.2-alpine3.20 as builder
+# syntax=docker/dockerfile:1.7
 
-RUN apk add git
+# --------------------------------------------------
+# Build stage
+# --------------------------------------------------
+FROM golang:1.25-bookworm AS builder
 
-WORKDIR /go/src/github.com/eclipse-xfsc/redis-cache-service
+WORKDIR /src
 
-ARG APP_REPO_TAG
+# Dependencies
+COPY go.mod go.sum ./
+COPY vendor/ ./vendor/
 
-ADD . .
+# Application sources
+COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-X main.Version=$APP_REPO_TAG" -mod=vendor -o /tmp/cache ./cmd/cache/...
+# Build static binary
+RUN CGO_ENABLED=0 go build \
+    -trimpath \
+    -mod=vendor \
+    -buildvcs=false \
+    -ldflags="-s -w" \
+    -o /cache \
+    ./cmd/cache
 
-FROM alpine:3.19 as runner
+# --------------------------------------------------
+# Runtime stage
+# --------------------------------------------------
+FROM gcr.io/distroless/static-debian12:nonroot
 
-COPY --from=builder /tmp/cache /opt/cache
+WORKDIR /
 
-WORKDIR /opt
+COPY --from=builder --chown=65532:65532 /cache /cache
 
-CMD ["./cache"]
+USER 65532:65532
+
+EXPOSE 8080
+
+ENTRYPOINT ["/cache"]

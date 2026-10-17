@@ -1,0 +1,20 @@
+{{- if .Values.resourceClaim.redis.enabled }}
+apiVersion: resources.xfsc.io/v1alpha1
+kind: ResourceClaim
+metadata:
+  name: {{ default (printf "%s-redis" .Release.Name) .Values.resourceClaim.redis.name | quote }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "app.labels" . | nindent 4 }}
+spec:
+  type: redis
+  providerRef:
+    name: {{ .Values.resourceClaim.redis.providerRef.name | quote }}
+  secretRef:
+    name: {{ .Values.resourceClaim.redis.secretRef.name | quote }}
+  parameters:
+    database: {{ .Values.resourceClaim.redis.database | int }}
+    acl:
+      keys:
+        {{- toYaml .Values.resourceClaim.redis.acl.keys | nindent 8 }}
+{{- end }}

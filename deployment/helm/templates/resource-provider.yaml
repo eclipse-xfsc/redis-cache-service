@@ -1,0 +1,14 @@
+{{- if .Values.resourceProvider.cache.enabled }}
+apiVersion: resources.xfsc.io/v1alpha1
+kind: ResourceProvider
+metadata:
+  name: {{ default (printf "%s-cache" (include "app.name" .)) .Values.resourceProvider.cache.name | quote }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "app.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.resourceProvider.cache.type | quote }}
+  outputs:
+    env:
+      {{ .Values.resourceProvider.cache.envName }}: {{ printf "http://%s.%s.svc.cluster.local:%v" (include "app.name" .) .Release.Namespace .Values.service.port | quote }}
+{{- end }}

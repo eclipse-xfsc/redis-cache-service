@@ -137,3 +137,104 @@ golangci-lint run
 ## License
 
 [Apache 2.0 license](LICENSE)
+
+## Local development with Docker Compose
+
+This repository includes a root `compose.yaml` with the cache API, Redis 7 and NATS 2.10. From the repository root:
+
+```bash
+docker compose up --build -d
+docker compose ps
+docker compose logs -f cache
+curl -i http://localhost:8080/readiness
+```
+
+The API listens on `localhost:8080`, Prometheus metrics on `localhost:2112`, Redis on `127.0.0.1:6379`, and NATS on `127.0.0.1:4222`. The development-only Redis password is `localtest`; never reuse it in production. Redis and NATS are ephemeral in this setup. To stop everything use `docker compose down`; add `--volumes` to discard named volumes if added later.
+
+Alternatively, from the repository root, use `docker compose -f deployment/compose/compose.yaml up --build` (requires a Compose implementation supporting `include`). The Docker image builds using vendored Go dependencies. Build errors should be checked against the committed vendor tree and Go toolchain.
+
+### API smoke test
+
+```bash
+curl -i http://localhost:8080/readiness
+curl -i -X POST http://localhost:8080/v1/cache \
+  -H 'Content-Type: application/json' \
+  -H 'x-cache-key: example' \
+  -H 'x-cache-namespace: demo' \
+  -H 'x-cache-scope: local' \
+  -d '{"hello":"world"}'
+curl -i http://localhost:8080/v1/cache \
+  -H 'x-cache-key: example' \
+  -H 'x-cache-namespace: demo' \
+  -H 'x-cache-scope: local'
+```
+
+Consult `gen/http/openapi3.yaml` for exact request schemas and required headers; adjust the example payload if your generated API requires a wrapper. The external-cache endpoint publishes CloudEvents to NATS on `external_cache_events`; it is distinct from a regular cache write. To debug Redis connectivity run `docker compose exec redis redis-cli -a localtest ping`. Check application logs if the service starts but `/readiness` succeeds while Redis is unavailable: the current readiness implementation does not prove dependency readiness.
+
+### Environment variables
+
+| Variable | Purpose | Local Compose value |
+| --- | --- | --- |
+| `HTTP_HOST`, `HTTP_PORT` | API listener | `0.0.0.0`, `8080` |
+| `REDIS_ADDR` | Redis endpoint | `redis:6379` |
+| `REDIS_USER`, `REDIS_PASS` | Redis credentials | `default`, `localtest` |
+| `REDIS_DB`, `REDIS_EXPIRATION` | Logical DB and default TTL | `0`, `1h` |
+| `REDIS_CLUSTER` | Redis cluster mode | `false` |
+| `NATS_ADDR`, `NATS_SUBJECT` | NATS server and event subject | `nats:4222`, `external_cache_events` |
+| `METRICS_ADDR` | Prometheus listener | `:2112` |
+| `AUTH_ENABLED`, `AUTH_JWK_URL` | Optional authentication | disabled by default |
+
+`REDIS_USER` and `REDIS_PASS` are declared required in the Go configuration, including for environments where authentication is not otherwise used. Set them explicitly.
+
+## Kubernetes / Helm deployment
+
+Install without the XFSC injection operator by leaving `podAnnotations` empty and `resourceClaim.redis.enabled: false`. The deployment then supplies `REDIS_ADDR`, `REDIS_USER`, `REDIS_PASS`, and `NATS_ADDR` from values. Application-owned settings (`REDIS_DB`, `REDIS_EXPIRATION`, `REDIS_CLUSTER`, `NATS_SUBJECT`, HTTP and log settings) are always set by Helm.
+
+With a working XFSC injection webhook, configure:
+
+```yaml
+podAnnotations:
+  inject.xfsc.io/enabled: "true"
+  inject.xfsc.io/needs: "redis,nats" # use actual provider names
+```
+
+When injection is enabled the chart deliberately omits `REDIS_ADDR`, `REDIS_USER`, `REDIS_PASS` and `NATS_ADDR` from its container environment. The operator must inject **exactly these names**. Confirm the actual names and ResourceProvider replacements for your operator installation before deployment. `envFrom`, `secretEnv` and `extraVars` remain available; avoid duplicate environment names.
+
+### Redis ResourceClaim
+
+An opt-in template `templates/resourceclaim-redis.yaml` has been added. **The uploaded repository does not contain the installed XFSC ResourceClaim CRD or an authoritative Redis provider claim schema**, so the template accepts a configurable `resourceClaim.redis.spec` rather than inventing provider-specific spec fields. Before enabling it, inspect the cluster:
+
+```bash
+kubectl api-resources | grep -i resourceclaim
+kubectl get crd | grep -i resourceclaim
+kubectl explain resourceclaim.spec --recursive
+```
+
+Configure the real `apiVersion`, `name` and `spec` from your operator's CRD, for example:
+
+```yaml
+resourceClaim:
+  apiVersion: <ACTUAL-API-VERSION>
+  redis:
+    enabled: true
+    name: cache-redis
+    spec: {} # REPLACE with your installed operator's Redis claim spec
+```
+
+The empty `spec` is **not** a deployable Redis claim; it is an intentional placeholder. If the provider creates a Kubernetes Secret, verify that the injected username/password map to `REDIS_USER` and `REDIS_PASS`. Ensure the operator's `inject.xfsc.io/needs` provider identifier matches the created claim/provider configuration.
+
+### Helm checks
+
+```bash
+helm lint deployment/helm
+helm template cache deployment/helm --namespace cache-test
+helm upgrade --install cache deployment/helm --namespace cache-test --create-namespace
+kubectl -n cache-test describe deployment cache
+kubectl -n cache-test get pods
+```
+
+The chart's Service now correctly exposes `.Values.service.port` and forwards to the named `http` container port. The previous template had reversed Service port/targetPort and malformed `envFrom` indentation. The default values reference a private container registry and image pull secret; override both when deploying outside that environment. The existing ingress configuration uses an NGINX rewrite expression with `pathType: Prefix`; validate and adapt it for your ingress controller before exposing externally.
+
+### Limitations and follow-up work
+
+The `/readiness` endpoint is currently application health, not a Redis/NATS dependency check. Production deployments should implement Redis PING and a meaningful NATS connectivity check with timeouts, and decide whether dependency outages should cause readiness failure. The Helm ResourceClaim is a configurable integration point, not a verified operator-specific Redis claim. This change has not been validated against a live Kubernetes cluster or a running Docker daemon in the provided environment.

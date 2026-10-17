@@ -5,6 +5,7 @@ go 1.24.0
 require (
 	github.com/cloudevents/sdk-go/protocol/nats/v2 v2.14.0
 	github.com/cloudevents/sdk-go/v2 v2.14.0
+	github.com/eclipse-xfsc/microservice-core-go v1.1.0
 	github.com/google/uuid v1.6.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/prometheus/client_golang v1.16.0
@@ -23,7 +24,6 @@ require (
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/dimfeld/httppath v0.0.0-20170720192232-ee938bf73598 // indirect
 	github.com/dimfeld/httptreemux/v5 v5.5.0 // indirect
-	github.com/eclipse-xfsc/microservice-core-go v1.1.0 // indirect
 	github.com/go-chi/chi/v5 v5.2.1 // indirect
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/zapr v1.3.0 // indirect

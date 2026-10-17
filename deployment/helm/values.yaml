@@ -5,6 +5,13 @@ name: cache
 # -- Ovverwrites application name
 nameOverride: ""
 
+resourceProvider:
+  cache:
+    enabled: true
+    name: cache
+    type: cache
+    envName: CACHE_ADDR
+
 image:
   repository: node-654e3bca7fbeeed18f81d7c7.ps-xaas.io
   # -- Image name
@@ -125,3 +132,17 @@ istio:
 
 secretEnv:
 
+
+# Operator integration: ResourceClaim schema is cluster/operator-version specific.
+# Set spec to the exact spec accepted by your installed CRD.
+resourceClaim:
+  apiVersion: resource.xfsc.io/v1alpha1 # VERIFY against kubectl api-resources
+  redis:
+    enabled: false
+    name: cache-redis
+    spec: {}
+
+# Set these annotations when the XFSC injection webhook and providers are installed.
+# podAnnotations:
+#   inject.xfsc.io/enabled: "true"
+#   inject.xfsc.io/needs: "redis,nats"
