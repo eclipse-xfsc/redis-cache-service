@@ -120,9 +120,11 @@ func (s *Service) SetExternal(ctx context.Context, req *cache.CacheSetRequest) e
 
 func makeCacheKey(key string, namespace, scope *string) string {
 	k := key
+
 	if namespace != nil && *namespace != "" {
-		k += "," + *namespace
+		k = *namespace + ":" + key
 	}
+
 	if scope != nil && *scope != "" {
 		k += "," + *scope
 	}
