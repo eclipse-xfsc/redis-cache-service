@@ -142,7 +142,7 @@ secretEnv:
 resourceClaim:
   apiVersion: resource.xfsc.io/v1alpha1 # VERIFY against kubectl api-resources
   redis:
-    enabled: false
+    enabled: true
     name: cache-redis
     database: 0
     acl:
