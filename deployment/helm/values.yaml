@@ -149,7 +149,7 @@ resourceClaim:
     name: cache-redis
     acl:
       keys:
-        - "~*"
+        - "cache:*"
 
 # Set these annotations when the XFSC injection webhook and providers are installed.
 # podAnnotations:
