@@ -144,7 +144,10 @@ resourceClaim:
   redis:
     enabled: false
     name: cache-redis
-    spec: {}
+    database: 0
+    acl:
+      keys:
+        - "~*"
 
 # Set these annotations when the XFSC injection webhook and providers are installed.
 # podAnnotations:

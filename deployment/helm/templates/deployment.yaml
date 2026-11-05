@@ -74,7 +74,7 @@ spec:
             - name: NATS_SUBJECT
               value: {{ .Values.cache.nats.subject | quote }}
             {{- if not $injected }}
-            - name: REDIS_ADDR
+            - name: REDIS_HOSTS
               value: {{ .Values.redis.addr | quote }}
             {{- with .Values.redis.user }}
             - name: REDIS_USER

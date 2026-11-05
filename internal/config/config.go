@@ -23,7 +23,7 @@ type httpConfig struct {
 
 type redisConfig struct {
 	// Addr specifies network address of Redis server
-	Addr    string        `envconfig:"REDIS_ADDR" required:"true"`
+	Addr    string        `envconfig:"REDIS_HOSTS" required:"true"`
 	User    string        `envconfig:"REDIS_USER" required:"true"`
 	Pass    string        `envconfig:"REDIS_PASS" required:"true"`
 	DB      int           `envconfig:"REDIS_DB" default:"0"`

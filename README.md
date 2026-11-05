@@ -88,7 +88,7 @@ The address, username and password of Redis must be provided as environment vari
 
 Example:
 ```
-REDIS_ADDR="localhost:6379"
+REDIS_HOSTS="localhost:6379"
 REDIS_USER="user"
 REDIS_PASS="pass"
 ```
@@ -176,7 +176,7 @@ Consult `gen/http/openapi3.yaml` for exact request schemas and required headers;
 | Variable | Purpose | Local Compose value |
 | --- | --- | --- |
 | `HTTP_HOST`, `HTTP_PORT` | API listener | `0.0.0.0`, `8080` |
-| `REDIS_ADDR` | Redis endpoint | `redis:6379` |
+| `REDIS_HOSTS` | Redis endpoint | `redis:6379` |
 | `REDIS_USER`, `REDIS_PASS` | Redis credentials | `default`, `localtest` |
 | `REDIS_DB`, `REDIS_EXPIRATION` | Logical DB and default TTL | `0`, `1h` |
 | `REDIS_CLUSTER` | Redis cluster mode | `false` |
@@ -188,7 +188,7 @@ Consult `gen/http/openapi3.yaml` for exact request schemas and required headers;
 
 ## Kubernetes / Helm deployment
 
-Install without the XFSC injection operator by leaving `podAnnotations` empty and `resourceClaim.redis.enabled: false`. The deployment then supplies `REDIS_ADDR`, `REDIS_USER`, `REDIS_PASS`, and `NATS_ADDR` from values. Application-owned settings (`REDIS_DB`, `REDIS_EXPIRATION`, `REDIS_CLUSTER`, `NATS_SUBJECT`, HTTP and log settings) are always set by Helm.
+Install without the XFSC injection operator by leaving `podAnnotations` empty and `resourceClaim.redis.enabled: false`. The deployment then supplies `REDIS_HOSTS`, `REDIS_USER`, `REDIS_PASS`, and `NATS_ADDR` from values. Application-owned settings (`REDIS_DB`, `REDIS_EXPIRATION`, `REDIS_CLUSTER`, `NATS_SUBJECT`, HTTP and log settings) are always set by Helm.
 
 With a working XFSC injection webhook, configure:
 
@@ -198,7 +198,7 @@ podAnnotations:
   inject.xfsc.io/needs: "redis,nats" # use actual provider names
 ```
 
-When injection is enabled the chart deliberately omits `REDIS_ADDR`, `REDIS_USER`, `REDIS_PASS` and `NATS_ADDR` from its container environment. The operator must inject **exactly these names**. Confirm the actual names and ResourceProvider replacements for your operator installation before deployment. `envFrom`, `secretEnv` and `extraVars` remain available; avoid duplicate environment names.
+When injection is enabled the chart deliberately omits `REDIS_HOSTS`, `REDIS_USER`, `REDIS_PASS` and `NATS_ADDR` from its container environment. The operator must inject **exactly these names**. Confirm the actual names and ResourceProvider replacements for your operator installation before deployment. `envFrom`, `secretEnv` and `extraVars` remain available; avoid duplicate environment names.
 
 ### Redis ResourceClaim
 
