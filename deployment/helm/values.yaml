@@ -23,9 +23,9 @@ image:
   # Uses image.tag if empty
   sha: ""
   # -- Image pull policy
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
   # -- Image pull secret when internal image is used
-  pullSecrets: deployment-key-light
+  #pullSecrets: deployment-key-light
 
 ## Use configMap or secretRef for environment variables
 useConfigMap: false
@@ -33,7 +33,11 @@ configMapName: my-configmap
 useSecretRef: false
 secretRefName: my-secret
 
-podAnnotations: {}
+
+podAnnotations:
+  inject.xfsc.io/enabled: "false"
+  inject.xfsc.io/needs: "redis, nats"
+
 ##
 ## Pass extra environment variables to the container.
 ##
@@ -118,7 +122,7 @@ redis:
   expiration: 1h
 
 ingress:
-  enabled: true
+  enabled: false
   annotations:
     kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/rewrite-target: /$2
@@ -128,7 +132,7 @@ ingress:
 
 istio:
   injection:
-    pod: true
+    pod: false
 
 secretEnv:
 
