@@ -137,6 +137,8 @@ istio:
 secretEnv:
 
 
+
+
 # Operator integration: ResourceClaim schema is cluster/operator-version specific.
 # Set spec to the exact spec accepted by your installed CRD.
 resourceClaim:
@@ -145,7 +147,6 @@ resourceClaim:
     providerRef: redis
     enabled: true
     name: cache-redis
-    database: 0
     acl:
       keys:
         - "~*"

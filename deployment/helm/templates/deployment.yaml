@@ -72,7 +72,7 @@ spec:
             - name: REDIS_CLUSTER
               value: {{ .Values.redis.cluster | default false | quote }}
             - name: NATS_SUBJECT
-              value: {{ .Values.cache.nats.subject | quote }}
+              value: {{ .Values.cache.nats.subject | quote }}            
             {{- if not $injected }}
             - name: REDIS_HOSTS
               value: {{ .Values.redis.addr | quote }}
@@ -86,6 +86,17 @@ spec:
             {{- end }}
             - name: NATS_ADDR
               value: {{ .Values.cache.nats.url | quote }}
+            {{- else }} 
+            - name: REDIS_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ printf "%s-redis-credentials" .Release.Name | quote }}
+                  key: "username"
+            - name: REDIS_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ printf "%s-redis-credentials" .Release.Name | quote }}
+                  key: "password"
             {{- end }}
             {{- range $key, $ref := .Values.secretEnv }}
             - name: {{ $key | quote }}

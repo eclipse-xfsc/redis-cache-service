@@ -13,7 +13,7 @@ spec:
   externalSecretRef:
     name: {{ printf "%s-redis-credentials" .Release.Name | quote }}
   parameters:
-    database: {{ .Values.resourceClaim.redis.database | int }}
+    database: {{ .Values.redis.database | int }}
     acl:
       keys:
         {{- toYaml .Values.resourceClaim.redis.acl.keys | nindent 8 }}
