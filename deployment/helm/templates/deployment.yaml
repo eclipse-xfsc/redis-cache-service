@@ -31,9 +31,11 @@ spec:
     spec:
       securityContext:
         {{- include "app.securitycontext" . | nindent 8 }}
+      {{- if .Values.image.pullSecrets }}
       {{- with .Values.image.pullSecrets }}
       imagePullSecrets:
         - name: {{ . | quote }}
+      {{- end }}
       {{- end }}
       containers:
         - name: {{ include "app.name" . }}
