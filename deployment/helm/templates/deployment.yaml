@@ -84,7 +84,7 @@ spec:
             - name: REDIS_PASS
               value: {{ . | quote }}
             {{- end }}
-            - name: NATS_ADDR
+            - name: NATS_URL
               value: {{ .Values.cache.nats.url | quote }}
             {{- else }} 
             - name: REDIS_USER

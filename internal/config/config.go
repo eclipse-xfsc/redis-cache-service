@@ -33,7 +33,7 @@ type redisConfig struct {
 
 type natsConfig struct {
 	// Addr specifies network address of NATS server
-	Addr string `envconfig:"NATS_ADDR" required:"true"`
+	Addr string `envconfig:"NATS_URL" required:"true"`
 	// Subject specifies NATS subject to publish events to
 	Subject string `envconfig:"NATS_SUBJECT" default:"external"`
 }

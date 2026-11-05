@@ -17,7 +17,7 @@ services:
   #     REDIS_DB: "0"
   #     REDIS_EXPIRATION: "1h"
   #     REDIS_CLUSTER: "false"
-  #     NATS_ADDR: "nats:4222"
+  #     NATS_URL: "nats:4222"
   #     NATS_SUBJECT: "external_cache_events"
   #   depends_on:
   #     redis:
